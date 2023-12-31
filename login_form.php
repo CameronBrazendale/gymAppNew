@@ -29,7 +29,7 @@ if (isset($_SESSION['user_name'])) {
       ?>
       <input type="text" name="username" required placeholder="Enter your username">
       <input type="password" name="password" required placeholder="Enter your password">
-      <input type="submit" name="submit" value="Login now" class="form-btn">
+      <input type="submit" name="submit" value="submit" class="form-btn">
       <p>Don't have an account? <a href="register_form.php">Register now</a></p>
    </form>
 </div>

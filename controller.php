@@ -1,6 +1,7 @@
 <?php
 
 session_start();
+print "session start here";
 
 @include 'config.php';
 @include 'model.php';
@@ -10,8 +11,12 @@ function redirect($location) {
     exit;
 }
 
+
 function loginController() {
     global $conn;
+
+    $variable = "Variable";
+echo "<script>console.log('$variable');</script>";
 
     if (isset($_POST['submit'])) {
         $username = mysqli_real_escape_string($conn, $_POST['username']);
@@ -23,12 +28,16 @@ function loginController() {
             $_SESSION['user_name'] = $result['data']['username'];
 
             if ($result['table'] == 'member') {
-                redirect('member_page.php');
+                print 'if statement member';
+                header('Location: member_page.php');
+                exit();
             } elseif ($result['table'] == 'trainer') {
-                redirect('trainer_page.php');
+                header('Location: trainer_page.php');
+                exit();
             }
         } else {
             $error[] = 'Incorrect username or password!';
+            print 'result is false';
         }
     }
 }

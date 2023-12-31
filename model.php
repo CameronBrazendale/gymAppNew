@@ -3,20 +3,28 @@
 function loginUser($username, $password) {
     global $conn;
 
-    $hashedPassword = md5($password);
+    $selectMember = "SELECT * FROM member WHERE username = ?";
+    $stmt = mysqli_prepare($conn, $selectMember);
+    mysqli_stmt_bind_param($stmt, "s", $username);
+    mysqli_stmt_execute($stmt);
+    $resultMember = mysqli_stmt_get_result($stmt);
 
-    $selectMember = "SELECT * FROM member WHERE username = '$username' AND password = '$hashedPassword'";
-    $resultMember = mysqli_query($conn, $selectMember);
-
-    if (mysqli_num_rows($resultMember) > 0) {
-        return ['table' => 'member', 'data' => mysqli_fetch_assoc($resultMember)];
+    if ($resultMember && $row = mysqli_fetch_assoc($resultMember)) {
+        if (password_verify($password, $row['password'])) {
+            return ['table' => 'member', 'data' => $row];
+        }
     }
 
-    $selectTrainer = "SELECT * FROM trainer WHERE username = '$username' AND password = '$hashedPassword'";
-    $resultTrainer = mysqli_query($conn, $selectTrainer);
+    $selectTrainer = "SELECT * FROM trainer WHERE username = ?";
+    $stmt = mysqli_prepare($conn, $selectTrainer);
+    mysqli_stmt_bind_param($stmt, "s", $username);
+    mysqli_stmt_execute($stmt);
+    $resultTrainer = mysqli_stmt_get_result($stmt);
 
-    if (mysqli_num_rows($resultTrainer) > 0) {
-        return ['table' => 'trainer', 'data' => mysqli_fetch_assoc($resultTrainer)];
+    if ($resultTrainer && $row = mysqli_fetch_assoc($resultTrainer)) {
+        if (password_verify($password, $row['password'])) {
+            return ['table' => 'trainer', 'data' => $row];
+        }
     }
 
     return false;
@@ -25,10 +33,19 @@ function loginUser($username, $password) {
 function registerUser($username, $password) {
     global $conn;
 
-    $hashedPassword = md5($password);
+    $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
-    $insert = "INSERT INTO member (username, password) VALUES ('$username', '$hashedPassword')";
-    mysqli_query($conn, $insert);
+    $selectQuery = "SELECT * FROM member WHERE username = ?";
+    $stmt = mysqli_prepare($conn, $selectQuery);
+    mysqli_stmt_bind_param($stmt, "s", $username);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    if (mysqli_num_rows($result) == 0) {
+        $insert = "INSERT INTO member (username, password) VALUES (?, ?)";
+        $stmt = mysqli_prepare($conn, $insert);
+        mysqli_stmt_bind_param($stmt, "ss", $username, $hashedPassword);
+        mysqli_stmt_execute($stmt);
+    }
 }
-
 ?>
